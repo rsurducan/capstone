@@ -1,0 +1,14 @@
+<form ng-submit="search()">
+    <input type="search" name="search" ng-model="term">
+    <button id="search">Search</button>
+</form>
+
+<h3>My Lists</h3>
+
+<div ng-show="searchResults.length">
+  <ul ng-repeat="list in searchResults">
+    <li>
+      <a href="" ng-click="edit(list)">{{list.name}}</a>
+    </li>
+  </ul>
+</div>
