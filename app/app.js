@@ -9,5 +9,7 @@ angular.module('myApp', ['ngMockE2E',
   'myApp.search'
 ]).
 config(['$routeProvider', function($routeProvider) {
-  $routeProvider.otherwise({redirectTo: '/view1'});
+  $routeProvider.otherwise({
+    redirectTo: '/view1'
+  });
 }]);
