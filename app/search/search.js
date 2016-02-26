@@ -16,7 +16,7 @@ angular.module('myApp.search', ['ngRoute'])
       templateUrl: 'search/edit.html',
       controller: 'EditController'
     })
-    .when('/lists/new', {
+    .when('/newlist', {
       templateUrl: 'search/addList.html',
       controller: 'AddListController'
     })
@@ -42,13 +42,6 @@ angular.module('myApp.search', ['ngRoute'])
     $scope.searchResults = response.data;
   });
 
-  $scope.search = function() {
-    console.log('call SearchController.search');
-    SearchService.search($scope.term).then(function(response) {
-      $scope.searchResults = response.data;
-    });
-  };
-
   $scope.editList = function(list) {
     console.log('call SearchController.edit');
     $location.path("/lists/" + list.id);
@@ -56,11 +49,11 @@ angular.module('myApp.search', ['ngRoute'])
 
   $scope.newList = function() {
     console.log('call SearchController.newList');
-    $location.path("/lists/new");
+    $location.path("/newlist");
   };
 })
 
-.controller('EditController', function($scope, $location, $routeParams, SearchService) {
+.controller('EditController', function($scope, $location, $route, $routeParams, SearchService) {
   console.log('call EditController');
 
   SearchService.fetchList($routeParams.id).then(function(response) {
@@ -71,6 +64,20 @@ angular.module('myApp.search', ['ngRoute'])
   $scope.addItem = function(list) {
     console.log('call EditController.addItem');
     $location.path("/addItem/" + list.id);
+  };
+
+  $scope.completeTask = function(itemId) {
+    console.log('call EditController.completeTask');
+    SearchService.completeTask($scope.list.id, itemId).then(function (response) {
+      $route.reload();
+    });
+  };
+
+  $scope.uncompleteTask = function(itemId) {
+    console.log('calls EditController.uncompleteTask with itemId=' + itemId);
+    SearchService.uncompleteTask($scope.list.id, itemId).then(function (response) {
+      $route.reload();
+    });
   };
 
 })
@@ -122,6 +129,14 @@ angular.module('myApp.search', ['ngRoute'])
     createItem: function(listId, itemName) {
       console.log('call POST /lists/' + listId + '/items payload: ' + itemName);
       return $http.post('/lists/' + listId + '/items', itemName);
+    },
+    completeTask: function(listId, itemId) {
+      console.log('call PUT /lists/' + listId + '/items/' + itemId);
+      return $http.put('/lists/' + listId + '/items/' + itemId, 'true');
+    },
+    uncompleteTask: function(listId, itemId) {
+      console.log('call PUT /lists/' + listId + '/items/' + itemId);
+      return $http.put('/lists/' + listId + '/items/' + itemId, 'false');
     }
   };
   return service;

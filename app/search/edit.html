@@ -4,6 +4,7 @@
 <div ng-show="list.items.length">
   <ul ng-repeat="item in list.items | filter: {completed: false}">
     <li>
+      <input type="checkbox" ng-click="completeTask(item.id)"/>&nbsp;
       {{item.name}}
     </li>
   </ul>
@@ -28,6 +29,7 @@
 <div ng-show="list.items.length">
   <ul ng-repeat="item in list.items | filter: {completed: true}">
     <li>
+      <input type="checkbox" checked="true" ng-click="uncompleteTask(item.id)"/>&nbsp;
       {{item.name}}
     </li>
   </ul>

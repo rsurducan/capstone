@@ -11,18 +11,22 @@ angular.module('myApp')
       description: "This is a template list",
       items: [
         {
+          id: 4,
           name: "Fourth task",
           completed: false
         },
         {
+          id: 3,
           name: "Third task",
           completed: false
         },
         {
+          id: 1,
           name: "First task",
           completed: true
         },
         {
+          id: 2,
           name: "Second task",
           completed: true
         }
@@ -86,6 +90,7 @@ angular.module('myApp')
       var lists = this.getData();
       var generatedId = Math.max.apply(Math, lists.map(function(element){return element.id;})) + 1;
       dataItem.id = generatedId;
+      dataItem.items = [];
       lists.push(dataItem);
       localStorage.setItem('myLists', JSON.stringify(lists));
     };
@@ -94,10 +99,28 @@ angular.module('myApp')
       var lists = this.getData();
       for (var i = 0; i < lists.length; i++) {
         if (lists[i].id == id) {
+          var items = lists[i].items;
+          var generatedItemId = Math.max.apply(Math, items.map(function(element){return element.id;})) + 1;
+          console.log('generatedItemId=' + generatedItemId);
           var itemElement = {};
+          itemElement.id = generatedItemId;
           itemElement.name = item;
           itemElement.completed = false;
-          lists[i].items.push(itemElement);
+          items.push(itemElement);
+        }
+      }
+      localStorage.setItem('myLists', JSON.stringify(lists));
+    };
+
+    this.toggleTask = function(listId, itemId, completedFlag) {
+      var lists = this.getData();
+      for (var i = 0; i < lists.length; i++) {
+        if (lists[i].id == listId) {
+          for (var j = 0; j < lists[i].items.length; j++) {
+            if (lists[i].items[j].id == itemId) {
+              lists[i].items[j].completed = completedFlag;
+            }
+          }
         }
       }
       localStorage.setItem('myLists', JSON.stringify(lists));
@@ -108,20 +131,21 @@ angular.module('myApp')
     $httpBackend.whenGET(/search\/index.html/).passThrough();
     $httpBackend.whenGET(/view/).passThrough();
     $httpBackend.whenGET(/search\/edit.html/).passThrough();
-    $httpBackend.whenGET(/search\/add.html/).passThrough();
+    $httpBackend.whenGET(/search\/addList.html/).passThrough();
 
     $httpBackend.whenGET(/\/search\/(.+)/).respond(function(method, url, data) {
-      console.log('call /\/search\/(.+)/');
+      console.log('call GET /\/search\/(.+)/');
       // parse the matching URL to pull out the term (/search/:term)
       var term = url.split('/')[2];
       var results = ServerDataModel.search(term);
+      console.log('results: ' + JSON.stringify(results));
       return [200, results, {
         Location: '/search/' + term
       }];
     });
 
     $httpBackend.whenGET(/\/lists\/\d+/).respond(function(method, url, data) {
-      console.log('call /\/lists\/\d+/');
+      console.log('call GET /\/lists\/\d+/');
       // parse the matching URL to pull out the id (/edit/:id)
       var id = url.split('/')[2];
       var results = ServerDataModel.find(id);
@@ -132,13 +156,27 @@ angular.module('myApp')
     });
 
     $httpBackend.whenGET(/\/lists/).respond(function(method, url, data) {
-      console.log('call /\/lists/');
+      console.log('call GET /\/lists/');
       var results = ServerDataModel.search("");
+      console.log('results: ' + JSON.stringify(results));
       return [200, results];
     });
 
+    $httpBackend.whenPUT(/\/lists\/\d+\/items\/\d+/).respond(function(method, url, data) {
+      console.log('call PUT /\/lists\/\d+\/items\/\d+/');
+      var pathParams = url.split('/');
+      var listId = pathParams[2];
+      var itemId = pathParams[4];
+      console.log('call ServerDataModel.toggleTask with listId:' + listId + ', itemId:' + itemId + ', completedFlag:' + data);
+      ServerDataModel.toggleTask(listId, itemId, data);
+      var results = ServerDataModel.find(listId);
+      return [200, results, {
+        Location: '/lists/' + listId
+      }];
+    });
+
     $httpBackend.whenPUT(/\/lists\/\d+/).respond(function(method, url, data) {
-      console.log('call /\/lists\/\d+/');
+      console.log('call PUT /\/lists\/\d+/');
       // parse the matching URL to pull out the id (/edit/:id)
       var id = url.split('/')[2];
       var person = ServerDataModel.update(id, angular.fromJson(data));
@@ -148,7 +186,7 @@ angular.module('myApp')
     });
 
     $httpBackend.whenPOST(/\/lists\/\d+\/items/).respond(function(method, url, data) {
-      console.log('call /\/lists\/\d+\/items/');
+      console.log('call POST /\/lists\/\d+\/items/');
       var id = url.split('/')[2];
       ServerDataModel.addItem(id, data);
       var results = ServerDataModel.find(id);
@@ -158,7 +196,7 @@ angular.module('myApp')
     });
 
     $httpBackend.whenPOST(/\/lists/).respond(function(method, url, data) {
-      console.log('call /\/lists/');
+      console.log('call POST /\/lists/');
       ServerDataModel.save(angular.fromJson(data));
       var results = ServerDataModel.search("");
       return [200, results];
