@@ -3,13 +3,15 @@
   <button id="search">Search</button>
 </form>
 
-<h3>My Lists</h3>
-<a href="" ng-click="add()">Create a new list</a>
+<div>
+  <a href="" ng-click="newList()">Create a new list</a>
+  <h3>My Lists</h3>&nbsp;
+</div>
 
 <div ng-show="searchResults.length">
   <ul ng-repeat="list in searchResults">
     <li>
-      <a href="" ng-click="edit(list)">{{list.name}}</a>
+      <a href="" ng-click="editList(list)">{{list.name}}</a>
     </li>
   </ul>
 </div>

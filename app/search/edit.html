@@ -1,13 +1,34 @@
-<form ng-submit="save()">
-  <div>
-    <label for="name">Name:</label>
-    <input type="text" data-ng-model="list.name" id="name">
-  </div>
-  <div>
-    <label for="description">Description:</label>
-    <input type="text" data-ng-model="list.description" id="description">
-  </div>
-  <div>
-    <button type="submit" id="save">Save</button>
-  </div>
-</form>
+<div>
+  <label>Name:</label>{{list.name}}
+</div>
+<div ng-show="list.items.length">
+  <ul ng-repeat="item in list.items | filter: {completed: false}">
+    <li>
+      {{item.name}}
+    </li>
+  </ul>
+</div>
+
+<div ng-show="show">
+  <form ng-submit="createItem()">
+    <div>
+      <input type="text" ng-model="itemName" name="itemName">
+    </div>
+    <div>
+      <button type="submit" id="createItem" ng-click="show=!show">Add this item</button>
+    </div>
+  </form>
+</div>
+
+<div ng-hide="show">
+  <a href="" ng-click="show=!show; addItem(list)">Add another item</a>
+</div>
+
+
+<div ng-show="list.items.length">
+  <ul ng-repeat="item in list.items | filter: {completed: true}">
+    <li>
+      {{item.name}}
+    </li>
+  </ul>
+</div>

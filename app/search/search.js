@@ -1,9 +1,10 @@
+"use strict";
 angular.module('myApp.search', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
   console.log('call routeProvider');
   $routeProvider
-    .when('/search', {
+    .when('/lists', {
       templateUrl: 'search/index.html',
       controller: 'SearchController'
     })
@@ -11,82 +12,116 @@ angular.module('myApp.search', ['ngRoute'])
       templateUrl: 'search/index.html',
       controller: 'SearchController'
     })
-    .when('/edit/:id', {
+    .when('/lists/:id', {
       templateUrl: 'search/edit.html',
       controller: 'EditController'
     })
-    .when('/add', {
-      templateUrl: 'search/add.html',
-      controller: 'AddController'
+    .when('/lists/new', {
+      templateUrl: 'search/addList.html',
+      controller: 'AddListController'
+    })
+    .when('/lists/:id/items', {
+      templateUrl: 'search/edit.html',
+      controller: 'AddItemController'
+    })
+    .when('/addItem/:id', {
+      templateUrl: 'search/edit.html',
+      controller: 'AddItemController'
     });
 }])
 
 .controller('SearchController', function($scope, $location, $routeParams, SearchService) {
   console.log('call SearchController');
-  if ($routeParams.term) {
-    SearchService.query($routeParams.term).then(function(response) {
-      console.log('call SearchService.query');
-      $scope.term = $routeParams.term;
-      $scope.searchResults = response.data;
-    });
+  var searchTerm = $routeParams.term;
+  if (!searchTerm) {
+    searchTerm = "*";
   }
+  SearchService.search(searchTerm).then(function(response) {
+    console.log('call SearchService.query');
+    $scope.term = searchTerm;
+    $scope.searchResults = response.data;
+  });
 
   $scope.search = function() {
     console.log('call SearchController.search');
-    SearchService.query($scope.term).then(function(response) {
+    SearchService.search($scope.term).then(function(response) {
       $scope.searchResults = response.data;
     });
   };
 
-  $scope.edit = function(list) {
+  $scope.editList = function(list) {
     console.log('call SearchController.edit');
-    $location.path("/edit/" + list.id);
-  }
+    $location.path("/lists/" + list.id);
+  };
 
-  $scope.add = function() {
-    console.log('call SearchController.add');
-    $location.path("/add");
-  }
+  $scope.newList = function() {
+    console.log('call SearchController.newList');
+    $location.path("/lists/new");
+  };
 })
 
 .controller('EditController', function($scope, $location, $routeParams, SearchService) {
   console.log('call EditController');
-  SearchService.fetch($routeParams.id).then(function(response) {
+
+  SearchService.fetchList($routeParams.id).then(function(response) {
     console.log('call EditController.fetch');
     $scope.list = response.data;
   });
 
-  $scope.save = function() {
-    console.log('call EditController.save');
-    SearchService.save($scope.list).then(function(response) {
-      $location.path("/search/" + $scope.list.name);
-    });
-  }
+  $scope.addItem = function(list) {
+    console.log('call EditController.addItem');
+    $location.path("/addItem/" + list.id);
+  };
+
 })
 
-.controller('AddController', function($scope, $location, SearchService) {
-  console.log('call AddController');
-  $scope.create = function() {
-    console.log('call AddController.create');
-    SearchService.create($scope.list).then(function(response) {
+.controller('AddListController', function($scope, $location, SearchService) {
+  console.log('call AddListController');
+
+  $scope.createList = function() {
+    console.log('call AddListController.create');
+    SearchService.createList($scope.list).then(function(response) {
       $location.path("/search/" + $scope.list.name);
     });
-  }
+  };
+})
+
+.controller('AddItemController', function($scope, $location, $routeParams, SearchService) {
+  console.log('call AddItemController');
+  SearchService.fetchList($routeParams.id).then(function(response) {
+    console.log('call AddItemController.fetch');
+    $scope.list = response.data;
+  });
+
+  $scope.createItem = function() {
+    console.log('call AddItemController.createItem');
+    SearchService.createItem($scope.list.id, $scope.itemName).then(function (response) {
+      $location.path("/lists/" + $scope.list.id);
+    });
+  };
 })
 
 .factory('SearchService', function($http) {
   var service = {
-    query: function(term) {
+    search: function(term) {
+      console.log('call GET /search/' + term);
       return $http.get('/search/' + term);
     },
-    fetch: function(id) {
-      return $http.get('/edit/' + id);
+    fetchList: function(id) {
+      console.log('call GET /lists/' + id);
+      return $http.get('/lists/' + id);
     },
-    save: function(data) {
-      return $http.put('/edit/' + data.id, data);
+    updateList: function(data) {
+      console.log('call PUT /lists/' + data.id + ' payload: ' + JSON.stringify(data));
+      return $http.put('/lists/' + data.id, data);
     },
-    create: function(data) {
-      return $http.post('/add/', data);
+    createList: function(data) {
+      console.log('call POST /lists/ payload: ' + JSON.stringify(data));
+      return $http.post('/lists/', data);
+    },
+    createItem: function(listId, itemName) {
+      console.log('call POST /lists/' + listId + '/items payload: ' + itemName);
+      return $http.post('/lists/' + listId + '/items', itemName);
     }
   };
   return service;
