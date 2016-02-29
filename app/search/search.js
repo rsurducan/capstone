@@ -22,11 +22,11 @@ angular.module('myApp.search', ['ngRoute'])
     })
     .when('/lists/:id/items', {
       templateUrl: 'search/edit.html',
-      controller: 'AddItemController'
+      controller: 'EditController'
     })
     .when('/addItem/:id', {
       templateUrl: 'search/edit.html',
-      controller: 'AddItemController'
+      controller: 'EditController'
     });
 }])
 
@@ -44,6 +44,7 @@ angular.module('myApp.search', ['ngRoute'])
 
   $scope.editList = function(list) {
     console.log('call SearchController.edit');
+    $scope.show = false;
     $location.path("/lists/" + list.id);
   };
 
@@ -61,9 +62,12 @@ angular.module('myApp.search', ['ngRoute'])
     $scope.list = response.data;
   });
 
-  $scope.addItem = function(list) {
-    console.log('call EditController.addItem');
-    $location.path("/addItem/" + list.id);
+  $scope.createItem = function() {
+    console.log('call EditController.createItem');
+    SearchService.createItem($scope.list.id, $scope.itemName).then(function (response) {
+      $route.reload();
+      //$location.path("/lists/" + $scope.list.id);
+    });
   };
 
   $scope.completeTask = function(itemId) {
@@ -91,21 +95,11 @@ angular.module('myApp.search', ['ngRoute'])
       $location.path("/search/" + $scope.list.name);
     });
   };
-})
 
-.controller('AddItemController', function($scope, $location, $routeParams, SearchService) {
-  console.log('call AddItemController');
-  SearchService.fetchList($routeParams.id).then(function(response) {
-    console.log('call AddItemController.fetch');
-    $scope.list = response.data;
-  });
-
-  $scope.createItem = function() {
-    console.log('call AddItemController.createItem');
-    SearchService.createItem($scope.list.id, $scope.itemName).then(function (response) {
-      $location.path("/lists/" + $scope.list.id);
-    });
-  };
+  $scope.cancelListCreation = function() {
+    console.log('call AddListController.cancelListCreation');
+    $location.path("/lists");
+  }
 })
 
 .factory('SearchService', function($http) {

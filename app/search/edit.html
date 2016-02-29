@@ -16,13 +16,14 @@
       <input type="text" ng-model="itemName" name="itemName">
     </div>
     <div>
-      <button type="submit" id="createItem" ng-click="show=!show">Add this item</button>
+      <button type="submit" id="createItem">Add this item</button>
+      <a class="btn" ng-click="show=!show">Close</a>
     </div>
   </form>
 </div>
 
 <div ng-hide="show">
-  <a href="" ng-click="show=!show; addItem(list)">Add another item</a>
+  <a href="" ng-click="show=!show">Add another item</a>
 </div>
 
 

@@ -5,33 +5,7 @@
 'use strict';
 angular.module('myApp')
   .service('ServerDataModel', function ServerDataModel() {
-    var lists = [{
-      id: 1,
-      name: "Blank list",
-      description: "This is a template list",
-      items: [
-        {
-          id: 4,
-          name: "Fourth task",
-          completed: false
-        },
-        {
-          id: 3,
-          name: "Third task",
-          completed: false
-        },
-        {
-          id: 1,
-          name: "First task",
-          completed: true
-        },
-        {
-          id: 2,
-          name: "Second task",
-          completed: true
-        }
-      ]
-    }];
+    var lists = [];
 
     this.getData = function() {
       var myLists = localStorage.getItem('myLists');
@@ -86,21 +60,31 @@ angular.module('myApp')
       return match;
     };
 
-    this.save = function(dataItem) {
+    this.createList = function(dataItem) {
       var lists = this.getData();
-      var generatedId = Math.max.apply(Math, lists.map(function(element){return element.id;})) + 1;
+      var generatedId;
+      if (lists.length === 0) {
+        generatedId = 1;
+      } else {
+        generatedId = Math.max.apply(Math, lists.map(function(element){return element.id;})) + 1;
+      }
       dataItem.id = generatedId;
       dataItem.items = [];
       lists.push(dataItem);
       localStorage.setItem('myLists', JSON.stringify(lists));
     };
 
-    this.addItem = function(id, item) {
+    this.createItem = function(id, item) {
       var lists = this.getData();
       for (var i = 0; i < lists.length; i++) {
         if (lists[i].id == id) {
           var items = lists[i].items;
-          var generatedItemId = Math.max.apply(Math, items.map(function(element){return element.id;})) + 1;
+          var generatedItemId
+          if (items.length === 0) {
+            generatedItemId = 1;
+          } else {
+            generatedItemId = Math.max.apply(Math, items.map(function(element){return element.id;})) + 1;
+          }
           console.log('generatedItemId=' + generatedItemId);
           var itemElement = {};
           itemElement.id = generatedItemId;
@@ -188,7 +172,7 @@ angular.module('myApp')
     $httpBackend.whenPOST(/\/lists\/\d+\/items/).respond(function(method, url, data) {
       console.log('call POST /\/lists\/\d+\/items/');
       var id = url.split('/')[2];
-      ServerDataModel.addItem(id, data);
+      ServerDataModel.createItem(id, data);
       var results = ServerDataModel.find(id);
       return [200, results, {
         Location: '/lists/' + id
@@ -197,7 +181,7 @@ angular.module('myApp')
 
     $httpBackend.whenPOST(/\/lists/).respond(function(method, url, data) {
       console.log('call POST /\/lists/');
-      ServerDataModel.save(angular.fromJson(data));
+      ServerDataModel.createList(angular.fromJson(data));
       var results = ServerDataModel.search("");
       return [200, results];
     });
