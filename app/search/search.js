@@ -27,6 +27,10 @@ angular.module('myApp.search', ['ngRoute'])
     .when('/addItem/:id', {
       templateUrl: 'search/edit.html',
       controller: 'EditController'
+    })
+    .when('/editList/:id', {
+      templateUrl: 'search/editList.html',
+      controller: 'EditListController'
     });
 }])
 
@@ -42,7 +46,7 @@ angular.module('myApp.search', ['ngRoute'])
     $scope.searchResults = response.data;
   });
 
-  $scope.editList = function(list) {
+  $scope.editListItems = function(list) {
     console.log('call SearchController.edit');
     $scope.show = false;
     $location.path("/lists/" + list.id);
@@ -54,11 +58,12 @@ angular.module('myApp.search', ['ngRoute'])
   };
 })
 
-.controller('EditController', function($scope, $location, $route, $routeParams, SearchService) {
+.controller('EditController', function($scope, $location, $route, $routeParams, SearchService, SharedProperties) {
   console.log('call EditController');
 
   SearchService.fetchList($routeParams.id).then(function(response) {
     console.log('call EditController.fetch');
+    $scope.show = SharedProperties.getShowFlag();
     $scope.list = response.data;
   });
 
@@ -84,15 +89,21 @@ angular.module('myApp.search', ['ngRoute'])
     });
   };
 
+  $scope.editList = function(list) {
+    console.log('call EditController.editList');
+    $location.path("/editList/" + list.id);
+  };
+
 })
 
-.controller('AddListController', function($scope, $location, SearchService) {
+.controller('AddListController', function($scope, $location, SearchService, SharedProperties) {
   console.log('call AddListController');
 
   $scope.createList = function() {
     console.log('call AddListController.create');
     SearchService.createList($scope.list).then(function(response) {
-      $location.path("/search/" + $scope.list.name);
+      SharedProperties.setShowFlag(true);
+      $location.path("/lists/" + response.data.id);
     });
   };
 
@@ -100,6 +111,35 @@ angular.module('myApp.search', ['ngRoute'])
     console.log('call AddListController.cancelListCreation');
     $location.path("/lists");
   }
+})
+
+.controller('EditListController', function($scope, $location, $routeParams, SearchService, SharedProperties) {
+  console.log('call EditListController');
+  SearchService.fetchList($routeParams.id).then(function(response) {
+    $scope.list = response.data;
+  });
+
+  $scope.cancelListEditing = function() {
+    console.log('call EditListController.cancelListEditing');
+    $location.path("/lists/" + $scope.list.id);
+  };
+
+  $scope.deleteList = function() {
+    console.log('call EditListController.deleteList');
+    SearchService.deleteList($scope.list.id).then(function(response) {
+      $location.path("/lists");
+    });
+  };
+
+  $scope.updateList = function() {
+    console.log('call EditListController.updateList');
+    console.log('call updateList with payload: ' + JSON.stringify($scope.list));
+    SearchService.updateList($scope.list).then(function(response) {
+      SharedProperties.setShowFlag(true);
+      $location.path("/lists/" + response.data.id);
+    });
+  }
+
 })
 
 .factory('SearchService', function($http) {
@@ -120,6 +160,10 @@ angular.module('myApp.search', ['ngRoute'])
       console.log('call POST /lists/ payload: ' + JSON.stringify(data));
       return $http.post('/lists/', data);
     },
+    deleteList: function(listId) {
+      console.log('call DELETE /lists/' + listId);
+      return $http.delete('/lists/' + listId);
+    },
     createItem: function(listId, itemName) {
       console.log('call POST /lists/' + listId + '/items payload: ' + itemName);
       return $http.post('/lists/' + listId + '/items', itemName);
@@ -134,4 +178,16 @@ angular.module('myApp.search', ['ngRoute'])
     }
   };
   return service;
+})
+
+.service('SharedProperties', function() {
+  var showFlag = false;
+  return {
+    getShowFlag: function() {
+      return showFlag;
+    },
+    setShowFlag: function(value) {
+      showFlag = value;
+    }
+  };
 });

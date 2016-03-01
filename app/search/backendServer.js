@@ -72,6 +72,7 @@ angular.module('myApp')
       dataItem.items = [];
       lists.push(dataItem);
       localStorage.setItem('myLists', JSON.stringify(lists));
+      return generatedId;
     };
 
     this.createItem = function(id, item) {
@@ -109,6 +110,16 @@ angular.module('myApp')
       }
       localStorage.setItem('myLists', JSON.stringify(lists));
     };
+
+    this.deleteList = function(listId) {
+      var lists = this.getData();
+      for (var i = 0; i < lists.length; i++) {
+        if (lists[i] == listId) {
+          lists.splice(i, 1);
+        }
+      }
+      localStorage.setItem('myLists', JSON.stringify(lists));
+    };
   })
   .run(function($httpBackend, ServerDataModel) {
     console.log('call the run function');
@@ -116,6 +127,7 @@ angular.module('myApp')
     $httpBackend.whenGET(/view/).passThrough();
     $httpBackend.whenGET(/search\/edit.html/).passThrough();
     $httpBackend.whenGET(/search\/addList.html/).passThrough();
+    $httpBackend.whenGET(/search\/editList.html/).passThrough();
 
     $httpBackend.whenGET(/\/search\/(.+)/).respond(function(method, url, data) {
       console.log('call GET /\/search\/(.+)/');
@@ -181,9 +193,16 @@ angular.module('myApp')
 
     $httpBackend.whenPOST(/\/lists/).respond(function(method, url, data) {
       console.log('call POST /\/lists/');
-      ServerDataModel.createList(angular.fromJson(data));
-      var results = ServerDataModel.search("");
+      var generatedListId = ServerDataModel.createList(angular.fromJson(data));
+      var results = ServerDataModel.find(generatedListId);
       return [200, results];
+    });
+
+    $httpBackend.whenDELETE(/\/lists\/\d+/).respond(function(method, url, data) {
+      console.log('call DELETE /\/lists\/\d+/');
+      var listId = url.split('/')[2];
+      ServerDataModel.deleteList(listId);
+      return 200;
     });
 
   });

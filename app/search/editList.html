@@ -1,0 +1,33 @@
+<div><h3>Edit this list</h3></div>
+
+<div>
+  <ul class="menu">
+    <li><a href="" ng-click="cancelListEditing()">Cancel</a></li>
+    <li><a href="" ng-click="deleteList()">Delete this list</a></li>
+  </ul>
+</div>
+
+<form ng-submit="updateList()">
+  <input type="hidden" ng-model="list.id"/>
+  <div>
+    <label for="name">TITLE</label>
+    <input type="text" ng-model="list.name" id="name"/>
+  </div>
+  <div ng-show="list.items.length">
+    <label for="itemName">ITEMS</label>
+    <ul ng-repeat="item in list.items | filter: {completed: false}">
+      <input type="hidden" ng-model="item.id"/>
+      <li>
+        <input type="text" ng-model="item.name"/>
+      </li>
+    </ul>
+  </div>
+  <div>
+    <label for="description">DESCRIPTION/NOTES (optional)</label>
+    <input type="text" ng-model="list.description" id="description">
+  </div>
+  <div>
+    <button type="submit" id="save">Save this list</button>
+    <a class="btn" ng-click="cancelListEditing()">Cancel</a>
+  </div>
+</form>

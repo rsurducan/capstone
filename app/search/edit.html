@@ -1,4 +1,11 @@
 <div>
+  <ul class="menu">
+    <li><a href="#/lists">My Lists</a></li>
+    <li>This list: <a href="" ng-click="editList(list)">Edit</a></li>
+  </ul>
+</div>
+
+<div>
   <label>Name:</label>{{list.name}}
 </div>
 <div ng-show="list.items.length">
