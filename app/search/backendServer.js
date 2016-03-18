@@ -86,7 +86,6 @@ angular.module('myApp')
           } else {
             generatedItemId = Math.max.apply(Math, items.map(function(element){return element.id;})) + 1;
           }
-          console.log('generatedItemId=' + generatedItemId);
           var itemElement = {};
           itemElement.id = generatedItemId;
           itemElement.name = item;
@@ -114,56 +113,61 @@ angular.module('myApp')
     this.deleteList = function(listId) {
       var lists = this.getData();
       for (var i = 0; i < lists.length; i++) {
-        if (lists[i] == listId) {
+        if (lists[i].id == listId) {
           lists.splice(i, 1);
+        }
+      }
+      localStorage.setItem('myLists', JSON.stringify(lists));
+    };
+
+    this.deleteItem = function(listId, itemId) {
+      var lists = this.getData();
+      for (var i = 0; i < lists.length; i++) {
+        if (lists[i].id == listId) {
+          for (var j = 0; j < lists[i].items.length; j++) {
+            if (lists[i].items[j].id == itemId) {
+              lists[i].items.splice(j, 1);
+            }
+          }
         }
       }
       localStorage.setItem('myLists', JSON.stringify(lists));
     };
   })
   .run(function($httpBackend, ServerDataModel) {
-    console.log('call the run function');
     $httpBackend.whenGET(/search\/index.html/).passThrough();
     $httpBackend.whenGET(/view/).passThrough();
-    $httpBackend.whenGET(/search\/edit.html/).passThrough();
+    $httpBackend.whenGET(/search\/addItem.html/).passThrough();
     $httpBackend.whenGET(/search\/addList.html/).passThrough();
     $httpBackend.whenGET(/search\/editList.html/).passThrough();
 
     $httpBackend.whenGET(/\/search\/(.+)/).respond(function(method, url, data) {
-      console.log('call GET /\/search\/(.+)/');
       // parse the matching URL to pull out the term (/search/:term)
       var term = url.split('/')[2];
       var results = ServerDataModel.search(term);
-      console.log('results: ' + JSON.stringify(results));
       return [200, results, {
         Location: '/search/' + term
       }];
     });
 
     $httpBackend.whenGET(/\/lists\/\d+/).respond(function(method, url, data) {
-      console.log('call GET /\/lists\/\d+/');
       // parse the matching URL to pull out the id (/edit/:id)
       var id = url.split('/')[2];
       var results = ServerDataModel.find(id);
-      console.log('results: ' + JSON.stringify(results));
       return [200, results, {
         Location: '/lists/' + id
       }];
     });
 
     $httpBackend.whenGET(/\/lists/).respond(function(method, url, data) {
-      console.log('call GET /\/lists/');
       var results = ServerDataModel.search("");
-      console.log('results: ' + JSON.stringify(results));
       return [200, results];
     });
 
     $httpBackend.whenPUT(/\/lists\/\d+\/items\/\d+/).respond(function(method, url, data) {
-      console.log('call PUT /\/lists\/\d+\/items\/\d+/');
       var pathParams = url.split('/');
       var listId = pathParams[2];
       var itemId = pathParams[4];
-      console.log('call ServerDataModel.toggleTask with listId:' + listId + ', itemId:' + itemId + ', completedFlag:' + data);
       ServerDataModel.toggleTask(listId, itemId, data);
       var results = ServerDataModel.find(listId);
       return [200, results, {
@@ -172,7 +176,6 @@ angular.module('myApp')
     });
 
     $httpBackend.whenPUT(/\/lists\/\d+/).respond(function(method, url, data) {
-      console.log('call PUT /\/lists\/\d+/');
       // parse the matching URL to pull out the id (/edit/:id)
       var id = url.split('/')[2];
       var person = ServerDataModel.update(id, angular.fromJson(data));
@@ -192,17 +195,25 @@ angular.module('myApp')
     });
 
     $httpBackend.whenPOST(/\/lists/).respond(function(method, url, data) {
-      console.log('call POST /\/lists/');
       var generatedListId = ServerDataModel.createList(angular.fromJson(data));
       var results = ServerDataModel.find(generatedListId);
       return [200, results];
     });
 
+    $httpBackend.whenDELETE(/\/lists\/\d+\/items\/\d+/).respond(function(method, url, data) {
+      var pathParams = url.split('/');
+      var listId = pathParams[2];
+      var itemId = pathParams[4];
+      ServerDataModel.deleteItem(listId, itemId);
+      var results = ServerDataModel.find(listId);
+      return [200, results];
+    });
+
     $httpBackend.whenDELETE(/\/lists\/\d+/).respond(function(method, url, data) {
-      console.log('call DELETE /\/lists\/\d+/');
       var listId = url.split('/')[2];
       ServerDataModel.deleteList(listId);
-      return 200;
+      var results = ServerDataModel.search("");
+      return [200, results];
     });
 
   });

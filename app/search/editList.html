@@ -1,33 +1,38 @@
-<div><h3>Edit this list</h3></div>
-
-<div>
-  <ul class="menu">
-    <li><a href="" ng-click="cancelListEditing()">Cancel</a></li>
-    <li><a href="" ng-click="deleteList()">Delete this list</a></li>
-  </ul>
+<div class="Full">
+  <div class="col">
+    <div class="SectionHeader">
+      <h1>Edit this list</h1>
+      <h3>
+        <a class="admin" ng-click="cancelListEditing()">Cancel</a>
+        |
+        <a class="admin" ng-click="deleteList()">Delete this list</a>
+    </div>
+    <form class="edit_list" ng-submit="updateList()">
+      <input type="hidden" ng-model="list.id"/>
+      <div class="listedit">
+        <h3>Title</h3>
+        <input class="big" size="30" type="text" ng-model="list.name" id="name"/>
+        <div ng-show="list.items.length">
+          <h3>Items</h3>
+          <ul ng-repeat="item in list.items | filter: {completed: false}">
+            <li>
+              <input type="hidden" ng-model="item.id"/>
+              <input class="medium" size="30" type="text" ng-model="item.name"/>
+              <img ng-src="images/delete.gif" ng-click="deleteItem(item.id)"/>
+            </li>
+          </ul>
+        </div>
+        <h3>
+          Description/Notes
+          <span class="sentence">(optional)</span>
+        </h3>
+        <textarea rows="5" cols="40" ng-model="list.description"></textarea>
+        <div class="buttonblock">
+          <input type="submit" style="font-weight: bold;" value="Save this list"/>
+          or
+          <a class="admin" ng-click="cancelListEditing()">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
-
-<form ng-submit="updateList()">
-  <input type="hidden" ng-model="list.id"/>
-  <div>
-    <label for="name">TITLE</label>
-    <input type="text" ng-model="list.name" id="name"/>
-  </div>
-  <div ng-show="list.items.length">
-    <label for="itemName">ITEMS</label>
-    <ul ng-repeat="item in list.items | filter: {completed: false}">
-      <input type="hidden" ng-model="item.id"/>
-      <li>
-        <input type="text" ng-model="item.name"/>
-      </li>
-    </ul>
-  </div>
-  <div>
-    <label for="description">DESCRIPTION/NOTES (optional)</label>
-    <input type="text" ng-model="list.description" id="description">
-  </div>
-  <div>
-    <button type="submit" id="save">Save this list</button>
-    <a class="btn" ng-click="cancelListEditing()">Cancel</a>
-  </div>
-</form>

@@ -1,0 +1,49 @@
+<div id="Header">
+  <div id="Nav">
+    <span id="MyListThisList">
+      <a href="#/lists">My Lists</a>
+      <strong>This list:</strong>
+    </span>
+    <a class="admin" href="" ng-click="editList(list)">Edit</a>
+  </div>
+</div>
+<div class="Left">
+  <div class="col">
+    <div class="">
+      <div class="ListHeader">
+        <h1>{{list.name}}</h1>
+      </div>
+      <div class="tadalist" ng-show="list.items.length">
+        <ul ng-repeat="item in list.items | filter: {completed: false}">
+          <li class="check">
+            <input type="checkbox" ng-click="completeTask(item.id)"/>&nbsp;
+            {{item.name}}
+          </li>
+        </ul>
+      </div>
+      <div class="listedit" ng-show="show">
+        <form ng-submit="createItem()">
+          <div>
+            <input class="medium" size="30" type="text" ng-model="itemName" name="itemName">
+          </div>
+          <div class="buttonblock">
+            <input type="submit" style="font-weight: bold;" value="Create this item"/>
+            or
+            <a class="admin" ng-click="show=!show">Close</a>
+          </div>
+        </form>
+      </div>
+      <div class="additem" ng-hide="show">
+        <a class="admin" ng-click="show=!show">Add another item</a>
+      </div>
+      <div class="tadalist" ng-show="list.items.length">
+        <ul ng-repeat="item in list.items | filter: {completed: true}">
+          <li class="check">
+            <input type="checkbox" checked="true" ng-click="uncompleteTask(item.id)"/>&nbsp;
+            {{item.name}}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+<div>

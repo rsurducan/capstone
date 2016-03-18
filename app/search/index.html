@@ -1,12 +1,18 @@
-<div>
-  <a href="" ng-click="newList()">Create a new list</a>
-  <h3>My Lists</h3>&nbsp;
+<div id="Header">
+  <div id="Nav" style="line-height: 57px; padding-right: 40px;">
+    <h1>My Lists</h1>
+    <a class="admin" href="" ng-click="newList()">Create a new list</a>
+  </div>
 </div>
-
-<div ng-show="searchResults.length">
-  <ul ng-repeat="list in searchResults">
-    <li>
-      <a href="" ng-click="editListItems(list)">{{list.name}}</a>
-    </li>
-  </ul>
+<div class="Left">
+  <div class="col">
+    <div class="recent" ng-show="searchResults.length">
+      <h1>My Lists</h1>
+      <ul ng-repeat="list in searchResults" class="mylists">
+        <li>
+          <a href="" ng-click="editListItems(list)">{{list.name}}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
 </div>

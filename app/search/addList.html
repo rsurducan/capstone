@@ -1,14 +1,25 @@
-<form ng-submit="createList()">
-  <div>
-    <label for="name">Name:</label>
-    <input type="text" data-ng-model="list.name" id="name">
+<div id="Header">
+  <div id="Nav" style="line-height: 57px; padding-right: 40px;">
+    <a class="admin" href="#/lists">My Lists</a>
   </div>
-  <div>
-    <label for="description">Description:</label>
-    <input type="text" data-ng-model="list.description" id="description">
+</div>
+<div class="Full">
+  <div class="col">
+    <div class="ListHeader">
+      <h1 style="font-size: 16px;">
+        Name your new list
+        <span style="margin-left: 3px; color: #666; font-weight: normal; font-size: 10px;">(Ex: "Things I need to do today")</span>
+      </h1>
+      <form id="new_list" class="new_list" ng-submit="createList()">
+        <div class="listedit">
+          <input class="big" type="text" size="30" data-ng-model="list.name" id="name">
+          <div class="buttonblock">
+            <input type="submit" style="font-weight: bold;" value="Create this list"/>
+            or
+            <a class="admin" ng-click="cancelListCreation()">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
-  <div>
-    <button type="submit" id="save">Create</button>
-    <a class="btn" ng-click="cancelListCreation()">Cancel</a>
-  </div>
-</form>
+</div>
